@@ -29,110 +29,174 @@ def SSD300(input_shape, num_classes=21):
     # References
         https://arxiv.org/abs/1512.02325
     """
+    # SSD网路（以键值对方式存储每个网络层张量）
     net = {}
+
+    # <editor-fold defaultstate = "collapsed" desc = "block1" >
     # Block 1
+    # 输入源
     input_tensor = input_tensor = Input(shape=input_shape)
     img_size = (input_shape[1], input_shape[0])
     net['input'] = input_tensor
+    # 卷积
     net['conv1_1'] = Convolution2D(64, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv1_1')(net['input'])
+    # 卷积
     net['conv1_2'] = Convolution2D(64, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv1_2')(net['conv1_1'])
+    # 池化
     net['pool1'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
                                 name='pool1')(net['conv1_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block2" >
     # Block 2
+    # 卷积
     net['conv2_1'] = Convolution2D(128, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv2_1')(net['pool1'])
+    # 卷积
     net['conv2_2'] = Convolution2D(128, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv2_2')(net['conv2_1'])
+    # 池化
     net['pool2'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
                                 name='pool2')(net['conv2_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block3" >
     # Block 3
+    # 卷积
     net['conv3_1'] = Convolution2D(256, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv3_1')(net['pool2'])
+    # 卷积
     net['conv3_2'] = Convolution2D(256, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv3_2')(net['conv3_1'])
+    # 卷积
     net['conv3_3'] = Convolution2D(256, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv3_3')(net['conv3_2'])
+    # 池化
     net['pool3'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
                                 name='pool3')(net['conv3_3'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block4" >
     # Block 4
+    # 卷积
     net['conv4_1'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv4_1')(net['pool3'])
+    # 卷积
     net['conv4_2'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv4_2')(net['conv4_1'])
+    # 卷积
     net['conv4_3'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv4_3')(net['conv4_2'])
+    # 池化
     net['pool4'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
                                 name='pool4')(net['conv4_3'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block5" >
     # Block 5
+    # 卷积
     net['conv5_1'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv5_1')(net['pool4'])
+    # 卷积
     net['conv5_2'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv5_2')(net['conv5_1'])
+    # 卷积
     net['conv5_3'] = Convolution2D(512, 3, 3,
                                    activation='relu',
                                    border_mode='same',
                                    name='conv5_3')(net['conv5_2'])
+    # 池化
     net['pool5'] = MaxPooling2D((3, 3), strides=(1, 1), border_mode='same',
                                 name='pool5')(net['conv5_3'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "fc6" >
     # FC6
+    # 带孔卷积
     net['fc6'] = AtrousConvolution2D(1024, 3, 3, atrous_rate=(6, 6),
                                      activation='relu', border_mode='same',
                                      name='fc6')(net['pool5'])
     # x = Dropout(0.5, name='drop6')(x)
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "fc7" >
     # FC7
+    # 卷积
     net['fc7'] = Convolution2D(1024, 1, 1, activation='relu',
                                border_mode='same', name='fc7')(net['fc6'])
     # x = Dropout(0.5, name='drop7')(x)
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block6" >
     # Block 6
+    # 卷积
     net['conv6_1'] = Convolution2D(256, 1, 1, activation='relu',
                                    border_mode='same',
                                    name='conv6_1')(net['fc7'])
+    # 卷积
     net['conv6_2'] = Convolution2D(512, 3, 3, subsample=(2, 2),
                                    activation='relu', border_mode='same',
                                    name='conv6_2')(net['conv6_1'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block7" >
     # Block 7
+    # 卷积
     net['conv7_1'] = Convolution2D(128, 1, 1, activation='relu',
                                    border_mode='same',
                                    name='conv7_1')(net['conv6_2'])
+    # ZeroPadding
     net['conv7_2'] = ZeroPadding2D()(net['conv7_1'])
+    # 卷积
     net['conv7_2'] = Convolution2D(256, 3, 3, subsample=(2, 2),
                                    activation='relu', border_mode='valid',
                                    name='conv7_2')(net['conv7_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "block8" >
     # Block 8
+    # 卷积
     net['conv8_1'] = Convolution2D(128, 1, 1, activation='relu',
                                    border_mode='same',
                                    name='conv8_1')(net['conv7_2'])
+    # 卷积
     net['conv8_2'] = Convolution2D(256, 3, 3, subsample=(2, 2),
                                    activation='relu', border_mode='same',
                                    name='conv8_2')(net['conv8_1'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "AveragePooling" >
     # Last Pool
     net['pool6'] = GlobalAveragePooling2D(name='pool6')(net['conv8_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from conv4_3" >
     # Prediction from conv4_3
     net['conv4_3_norm'] = Normalize(20, name='conv4_3_norm')(net['conv4_3'])
     num_priors = 3
@@ -153,6 +217,9 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv4_3_norm_mbox_priorbox')
     net['conv4_3_norm_mbox_priorbox'] = priorbox(net['conv4_3_norm'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from fc7" >
     # Prediction from fc7
     num_priors = 6
     net['fc7_mbox_loc'] = Convolution2D(num_priors * 4, 3, 3,
@@ -172,6 +239,9 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='fc7_mbox_priorbox')
     net['fc7_mbox_priorbox'] = priorbox(net['fc7'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from conv6_2" >
     # Prediction from conv6_2
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
@@ -191,6 +261,9 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv6_2_mbox_priorbox')
     net['conv6_2_mbox_priorbox'] = priorbox(net['conv6_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from conv7_2" >
     # Prediction from conv7_2
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
@@ -210,6 +283,9 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv7_2_mbox_priorbox')
     net['conv7_2_mbox_priorbox'] = priorbox(net['conv7_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from conv8_2" >
     # Prediction from conv8_2
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
@@ -229,6 +305,9 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv8_2_mbox_priorbox')
     net['conv8_2_mbox_priorbox'] = priorbox(net['conv8_2'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Prediction from pool6" >
     # Prediction from pool6
     num_priors = 6
     x = Dense(num_priors * 4, name='pool6_mbox_loc_flat')(net['pool6'])
@@ -248,6 +327,9 @@ def SSD300(input_shape, num_classes=21):
     net['pool6_reshaped'] = Reshape(target_shape,
                                     name='pool6_reshaped')(net['pool6'])
     net['pool6_mbox_priorbox'] = priorbox(net['pool6_reshaped'])
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Gather all predictions" >
     # Gather all predictions
     net['mbox_loc'] = merge([net['conv4_3_norm_mbox_loc_flat'],
                              net['fc7_mbox_loc_flat'],
@@ -271,6 +353,9 @@ def SSD300(input_shape, num_classes=21):
                                   net['pool6_mbox_priorbox']],
                                  mode='concat', concat_axis=1,
                                  name='mbox_priorbox')
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Reshape And Merge" >
     if hasattr(net['mbox_loc'], '_keras_shape'):
         num_boxes = net['mbox_loc']._keras_shape[-1] // 4
     elif hasattr(net['mbox_loc'], 'int_shape'):
@@ -286,5 +371,26 @@ def SSD300(input_shape, num_classes=21):
                                net['mbox_priorbox']],
                                mode='concat', concat_axis=2,
                                name='predictions')
+    # </editor-fold>
+
+    # <editor-fold defaultstate = "collapsed" desc = "Build Model" >
     model = Model(net['input'], net['predictions'])
     return model
+    # </editor-fold>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
